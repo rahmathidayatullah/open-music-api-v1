@@ -25,7 +25,7 @@ const mapSongDetailDBToModel = ({
   duration,
   created_at,
   updated_at,
-  albumId
+  albumId,
 }) => ({
   id,
   title,
@@ -35,7 +35,7 @@ const mapSongDetailDBToModel = ({
   duration,
   createdAt: created_at,
   updatedAt: updated_at,
-  albumId
+  albumId,
 });
 
 module.exports = {
