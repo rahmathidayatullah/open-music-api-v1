@@ -1,0 +1,19 @@
+env local
+
+# server configuration development
+
+HOST=localhost
+PORT=8000
+
+
+PGUSER=developer
+PGHOST=localhost
+PGPASSWORD=supersecretpassword
+PGDATABASE=openmusicapi
+PGPORT=5432
+
+version node v16
+postgree version 13
+
+runnning this command in psql for reset table
+truncate songs, albums;
