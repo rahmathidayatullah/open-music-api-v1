@@ -65,8 +65,6 @@ class AlbumsHandler {
     this._validator.validateSongsPayload(request.payload);
     const { id } = request.params;
 
-    console.log('request.payload', request.payload);
-
     await this._service.editSongById(id, request.payload);
 
     return {
