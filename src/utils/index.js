@@ -1,15 +1,17 @@
 /* eslint-disable camelcase */
-const mapAlbumsDBToModel = ({ id, name, year, created_at, updated_at }) => ({
+const mapAlbumsDBToModel = ({ id, name, year, created_at, updated_at, coverUrl }) => ({
   id,
   name,
   year,
   createdAt: created_at,
   updatedAt: updated_at,
+  coverUrl,
 });
-const mapSongsDBToModel = ({ id, title, performer }) => ({
+const mapSongsDBToModel = ({ id, title, performer, coverUrl }) => ({
   id,
   title,
   performer,
+  coverUrl,
 });
 
 const mapSongDetailDBToModel = ({
