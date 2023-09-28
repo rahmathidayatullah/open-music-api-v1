@@ -45,11 +45,15 @@ const _exports = require('./api/exports');
 const ProducerService = require('./services/rabbitmq/ProducerService');
 const ExportsValidator = require('./validator/exports');
 
+// cache
+const CacheService = require('./services/redis/CacheService');
+
 const ClientError = require('./exceptions/ClientError');
 
 const init = async () => {
   const songsService = new SongsService();
-  const albumsService = new AlbumsService(path.resolve(__dirname, 'api/albums/file/images'));
+  const cacheService = new CacheService();
+  const albumsService = new AlbumsService(path.resolve(__dirname, 'api/albums/file/images'), cacheService);
   const usersService = new UsersService();
   const playlistsService = new PlaylistsService();
   const playlistSongsService = new PlaylistSongsService(
