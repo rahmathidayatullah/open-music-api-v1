@@ -4,28 +4,30 @@ const InvariantError = require('../../exceptions/InvariantError');
 const NotFoundError = require('../../exceptions/NotFoundError');
 
 class PlaylistSongsService {
-  constructor(playlistsService, songsService) {
+  constructor(playlistsService, songsService, activitiesPlaylistService) {
     this._pool = new Pool();
     this._playlistsService = playlistsService;
     this._songsService = songsService;
+    this._activitiesPlaylistService = activitiesPlaylistService;
   }
 
   async addSongToPlaylists({ playlistId, songId, credentialId }) {
     await this._playlistsService.verifyOwnerPlaylist(playlistId, credentialId);
+    await this._activitiesPlaylistService.addActivityPlaylistSongs(playlistId, songId, credentialId, 'add');
 
-    const id = nanoid(16);
+    const idPlaylistSong = `playlist_songs-${nanoid(16)}`;
     const query = {
       text: 'INSERT INTO playlist_songs VALUES($1, $2, $3) RETURNING id',
-      values: [id, playlistId, songId],
+      values: [idPlaylistSong, playlistId, songId],
     };
     await this._songsService.verifySongs(songId);
-    const result = await this._pool.query(query);
+    const resultPlaylistSong = await this._pool.query(query);
 
-    if (!result.rows[0].id) {
+    if (!resultPlaylistSong.rows[0].id) {
       throw new InvariantError('Playlists gagal ditambahkan');
     }
 
-    return result.rows[0].id;
+    return resultPlaylistSong.rows[0].id;
   }
 
   async getSongByPlaylists({ playlistId, credentialId }) {
@@ -57,7 +59,7 @@ class PlaylistSongsService {
 
   async deleteSongInPlaylist({ playlistId, songId, credentialId }) {
     await this._playlistsService.verifyOwnerPlaylist(playlistId, credentialId);
-    await this._playlistsService.getPlaylistById(playlistId);
+    await this._activitiesPlaylistService.addActivityPlaylistSongs(playlistId, songId, credentialId, 'delete');
 
     const query = {
       text: 'DELETE from playlist_songs WHERE song_id = $1',

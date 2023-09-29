@@ -4,6 +4,8 @@ const { nanoid } = require('nanoid');
 const InvariantError = require('../../exceptions/InvariantError');
 const { mapAlbumsDBToModel } = require('../../utils');
 const NotFoundError = require('../../exceptions/NotFoundError');
+const ClientError = require('../../exceptions/ClientError');
+// const ClientError = require('../../exceptions/ClientError');
 // const AuthorizationError = require('../../exceptions/AuthorizationError');
 
 class AlbumsService {
@@ -120,27 +122,34 @@ class AlbumsService {
       text: 'INSERT INTO user_album_likes VALUES ($1, $2)',
       values: [credentialId, albumId],
     };
+    await this._cacheService.delete(`albums:${credentialId}`);
+    await this._cacheService.delete('albumsCount');
     await this._pool.query(query);
   }
 
   async getAlbumLikeById(credentialId) {
     try {
-      // mendapatkan catatan dari cache
-      const resultRedis = await this._cacheService.get(`albums:${credentialId}`);
+      // mendapatkan dari cache
+      const resultRedis = await this._cacheService.get(`albumsDetail:${credentialId}`);
+      if (resultRedis.rows.length && resultRedis.rows[0].user_id === credentialId) {
+        throw new ClientError(
+          'Album sudah di like',
+        );
+      }
       return JSON.parse(resultRedis);
     } catch (error) {
-      // catatan akan disimpan pada cache sebelum fungsi getNotes dikembalikan
+      // akan disimpan pada cache sebelum dikembalikan
       const query = {
         text: 'SELECT user_id from user_album_likes WHERE user_id = $1',
         values: [credentialId],
       };
       const result = await this._pool.query(query);
-      if (result.rows.length) {
-        throw new InvariantError(
-          'Gagal menambahkan user. Username sudah digunakan.',
+      if (result.rows.length && result.rows[0].user_id === credentialId) {
+        throw new ClientError(
+          'Album sudah di like',
         );
       }
-      await this._cacheService.set(`albums:${credentialId}`, JSON.stringify(result));
+      await this._cacheService.set(`albumsDetail:${credentialId}`, JSON.stringify(result));
       return result;
     }
   }
@@ -151,17 +160,27 @@ class AlbumsService {
       text: 'DELETE FROM user_album_likes WHERE user_id = $1',
       values: [credentialId],
     };
-    await this._cacheService.delete(`albums:${credentialId}`);
+    await this._cacheService.delete(`albumsDetail:${credentialId}`);
+    await this._cacheService.delete('albumsCount');
     await this._pool.query(query);
   }
 
   async getAlbumLike({ albumId }) {
-    const query = {
-      text: 'SELECT album_id FROM user_album_likes WHERE album_id = $1',
-      values: [albumId],
-    };
-    const result = await this._pool.query(query);
-    return result.rowCount;
+    try {
+      // mendapatkan dari cache
+      const resultRedis = await this._cacheService.get('albumsCount');
+      const parseResult = JSON.parse(resultRedis);
+
+      return { count: parseResult, cache: true };
+    } catch (error) {
+      const query = {
+        text: 'SELECT album_id FROM user_album_likes WHERE album_id = $1',
+        values: [albumId],
+      };
+      const result = await this._pool.query(query);
+      await this._cacheService.set('albumsCount', JSON.stringify(result.rowCount));
+      return { count: result.rowCount, cache: false };
+    }
   }
 }
 

@@ -97,9 +97,10 @@ class AlbumsHandler {
       status: 'success',
       message: 'Berhasil like album',
     });
-    request.response.header('X-Data-Source', 'cache');
-    response.code(201);
-    return response;
+    if (request && request.response && request.response.header) {
+      request.response.header('X-Data-Source', 'cache');
+    }
+    return response.code(201).header('X-Data-Source', '');
   }
 
   async deleteAlbumLikeHandler(request, h) {
@@ -111,21 +112,24 @@ class AlbumsHandler {
       status: 'success',
       message: 'Berhasil delete like album',
     });
-    return response;
+    return response.code(200).header('X-Data-Source', '');
   }
 
   async getAlbumLikeHandler(request, h) {
     const { id: albumId } = request.params;
 
-    const result = await this._service.getAlbumLike({ albumId });
+    const { count, cache } = await this._service.getAlbumLike({ albumId });
     const response = h.response({
       status: 'success',
       message: 'Berhasil like album',
       data: {
-        likes: result,
+        likes: count,
       },
     });
-    return response.code(200).header('X-Data-Source', 'cache');
+    if (cache) {
+      return response.code(200).header('X-Data-Source', 'cache');
+    }
+    return response.code(200).header('X-Data-Source', '');
   }
 }
 

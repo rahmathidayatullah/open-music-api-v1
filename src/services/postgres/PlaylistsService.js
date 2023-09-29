@@ -41,9 +41,18 @@ class PlaylistsService {
       values: [idPlaylists],
     };
 
-    const result = this._pool.query(query);
+    const result = await this._pool.query(query);
 
     return result.rows;
+  }
+
+  async deletePlaylistSongActivities(idPlaylists) {
+    const query = {
+      text: 'DELETE FROM playlist_song_activities where playlist_id = $1',
+      values: [idPlaylists],
+    };
+
+    await this._pool.query(query);
   }
 
   async verifyOwnerPlaylist(playlistId, credentialId) {

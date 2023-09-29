@@ -20,29 +20,8 @@ class ActivitiesPlaylistHandler {
     const response = h.response({
       status: 'success',
       data: {
-        playlistId: '',
-        activities: [
-          {
-            activity1: {
-              username: '',
-              title: '',
-              action: '',
-              time: '',
-            },
-            activity2: {
-              username: '',
-              title: '',
-              action: '',
-              time: '',
-            },
-            activity3: {
-              username: '',
-              title: '',
-              action: '',
-              time: '',
-            },
-          },
-        ],
+        playlistId,
+        activities: activitiesPlaylist,
       },
     });
     return response;

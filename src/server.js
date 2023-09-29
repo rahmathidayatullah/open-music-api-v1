@@ -56,12 +56,13 @@ const init = async () => {
   const albumsService = new AlbumsService(path.resolve(__dirname, 'api/albums/file/images'), cacheService);
   const usersService = new UsersService();
   const playlistsService = new PlaylistsService();
+  const activitiesPlaylistService = new ActivitiesPlaylistService(
+    playlistsService,
+  );
   const playlistSongsService = new PlaylistSongsService(
     playlistsService,
     songsService,
-  );
-  const activitiesPlaylistService = new ActivitiesPlaylistService(
-    playlistsService,
+    activitiesPlaylistService,
   );
   const authenticationsService = new AuthenticationsService();
   const exportsService = new ProducerService(playlistsService, playlistSongsService);
