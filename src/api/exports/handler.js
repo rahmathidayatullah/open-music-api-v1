@@ -15,8 +15,9 @@ class ExportsHandler {
     const { id: playlistId } = request.params;
     const result = await this._service.verifyOwnerPlaylist(credentialId, playlistId);
     delete result.playlist.username;
+
     const message = {
-      playlist: result.playlist,
+      playlist: result,
       targetEmail: request.payload.targetEmail,
     };
     await this._service.sendMessage('export:playlists', JSON.stringify(message));

@@ -5,8 +5,6 @@ const InvariantError = require('../../exceptions/InvariantError');
 const { mapAlbumsDBToModel } = require('../../utils');
 const NotFoundError = require('../../exceptions/NotFoundError');
 const ClientError = require('../../exceptions/ClientError');
-// const ClientError = require('../../exceptions/ClientError');
-// const AuthorizationError = require('../../exceptions/AuthorizationError');
 
 class AlbumsService {
   constructor(folder, cacheService) {
@@ -122,8 +120,8 @@ class AlbumsService {
       text: 'INSERT INTO user_album_likes VALUES ($1, $2)',
       values: [credentialId, albumId],
     };
-    await this._cacheService.delete(`albums:${credentialId}`);
-    await this._cacheService.delete('albumsCount');
+    await this._cacheService.delete(`albumsDetail:${albumId}`);
+    await this._cacheService.delete(`albumsCount:${albumId}`);
     await this._pool.query(query);
   }
 
@@ -161,14 +159,14 @@ class AlbumsService {
       values: [credentialId],
     };
     await this._cacheService.delete(`albumsDetail:${albumId}`);
-    await this._cacheService.delete('albumsCount');
+    await this._cacheService.delete(`albumsCount:${albumId}`);
     await this._pool.query(query);
   }
 
   async getAlbumLike({ albumId }) {
     try {
       // mendapatkan dari cache
-      const resultRedis = await this._cacheService.get('albumsCount');
+      const resultRedis = await this._cacheService.get(`albumsCount:${albumId}`);
       const parseResult = JSON.parse(resultRedis);
 
       return { count: parseResult, cache: true };
@@ -178,7 +176,7 @@ class AlbumsService {
         values: [albumId],
       };
       const result = await this._pool.query(query);
-      await this._cacheService.set('albumsCount', JSON.stringify(result.rowCount));
+      await this._cacheService.set(`albumsCount:${albumId}`, JSON.stringify(result.rowCount));
       return { count: result.rowCount, cache: false };
     }
   }
