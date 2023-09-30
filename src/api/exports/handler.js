@@ -14,6 +14,7 @@ class ExportsHandler {
     const { id: credentialId } = request.auth.credentials;
     const { id: playlistId } = request.params;
     const result = await this._service.verifyOwnerPlaylist(credentialId, playlistId);
+    delete result.playlist.username;
     const message = {
       playlist: result.playlist,
       targetEmail: request.payload.targetEmail,

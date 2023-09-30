@@ -41,10 +41,10 @@ const mapUsers = ({ id, username }) => ({
   username,
 });
 
-const mapPLaylists = ({ id, name, owner }) => ({
+const mapPLaylists = ({ id, name, username }) => ({
   id,
   name,
-  username: owner,
+  username,
 });
 
 module.exports = {

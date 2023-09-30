@@ -117,7 +117,7 @@ class AlbumsService {
 
   async postAlbumLike({ albumId, credentialId }) {
     await this.getAlbumById(albumId);
-    await this.getAlbumLikeById(credentialId);
+    await this.getAlbumLikeById(credentialId, albumId);
     const query = {
       text: 'INSERT INTO user_album_likes VALUES ($1, $2)',
       values: [credentialId, albumId],
@@ -127,10 +127,10 @@ class AlbumsService {
     await this._pool.query(query);
   }
 
-  async getAlbumLikeById(credentialId) {
+  async getAlbumLikeById(credentialId, albumId) {
     try {
       // mendapatkan dari cache
-      const resultRedis = await this._cacheService.get(`albumsDetail:${credentialId}`);
+      const resultRedis = await this._cacheService.get(`albumsDetail:${albumId}`);
       if (resultRedis.rows.length && resultRedis.rows[0].user_id === credentialId) {
         throw new ClientError(
           'Album sudah di like',
@@ -149,7 +149,7 @@ class AlbumsService {
           'Album sudah di like',
         );
       }
-      await this._cacheService.set(`albumsDetail:${credentialId}`, JSON.stringify(result));
+      await this._cacheService.set(`albumsDetail:${albumId}`, JSON.stringify(result));
       return result;
     }
   }
@@ -160,7 +160,7 @@ class AlbumsService {
       text: 'DELETE FROM user_album_likes WHERE user_id = $1',
       values: [credentialId],
     };
-    await this._cacheService.delete(`albumsDetail:${credentialId}`);
+    await this._cacheService.delete(`albumsDetail:${albumId}`);
     await this._cacheService.delete('albumsCount');
     await this._pool.query(query);
   }

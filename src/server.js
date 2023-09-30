@@ -45,6 +45,10 @@ const _exports = require('./api/exports');
 const ProducerService = require('./services/rabbitmq/ProducerService');
 const ExportsValidator = require('./validator/exports');
 
+// Exports
+const collaborations = require('./api/collaborations');
+const CollaboraionsService = require('./services/postgres/Collaboraions');
+const CollaboraionsValidator = require('./validator/collaborations');
 // cache
 const CacheService = require('./services/redis/CacheService');
 
@@ -66,6 +70,7 @@ const init = async () => {
   );
   const authenticationsService = new AuthenticationsService();
   const exportsService = new ProducerService(playlistsService, playlistSongsService);
+  const collaborationsService = new CollaboraionsService();
 
   const server = Hapi.server({
     port: process.env.PORT,
@@ -162,11 +167,19 @@ const init = async () => {
         validator: ExportsValidator,
       },
     },
+    {
+      plugin: collaborations,
+      options: {
+        service: collaborationsService,
+        validator: CollaboraionsValidator,
+      },
+    },
   ]);
 
   server.ext('onPreResponse', (request, h) => {
     // mendapatkan konteks response dari request
     const { response } = request;
+    console.log('response', response);
     if (response instanceof Error) {
       // penanganan client error secara internal.
       if (response instanceof ClientError) {

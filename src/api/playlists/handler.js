@@ -43,7 +43,7 @@ class PlaylistsHandler {
     const { id: idUser } = request.auth.credentials;
     const { id: idPlaylists } = request.params;
     await this._service.verifyOwnerPlaylist(idPlaylists, idUser);
-    await this._service.deletePlaylists({ idPlaylists });
+    await this._service.deletePlaylists({ idPlaylists, idUser });
 
     const response = h.response({
       status: 'success',
